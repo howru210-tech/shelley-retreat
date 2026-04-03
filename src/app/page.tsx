@@ -183,7 +183,7 @@ export default function LifeGalleryApp() {
           </div>
 
           <div style={{ width: '100%', marginBottom: '30px' }}>
-            <h2 style={{ fontSize: '20px', marginBottom: '15px' }}><Share2 size={20} inline /> 세상에 공유하기</h2>
+            <h2 style={{ fontSize: '20px', marginBottom: '15px' }}><Share2 size={20} /> 세상에 공유하기</h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
               {[ { id: 'k', name: '카카오', color: '#FEE500' }, { id: 'f', name: 'FB', color: '#1877F2' }, { id: 'i', name: '인스타', color: '#E4405F' }, { id: 'b', name: '밴드', color: '#2DB400' } ].map(s => (
                 <button key={s.id} className="btn" style={{ background: 'rgba(255,255,255,0.1)', height: '70px', padding: '5px' }} onClick={() => { setSharedPlatform(s.name); alert(`${s.name}에 공유되었습니다!`); }}>
@@ -195,7 +195,7 @@ export default function LifeGalleryApp() {
           </div>
 
           <div style={{ background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '20px', marginBottom: '30px', width: '100%' }}>
-            <h2 style={{ fontSize: '20px', marginBottom: '15px' }}><Users size={20} inline /> 초대 명단 정리 (Google 연동)</h2>
+            <h2 style={{ fontSize: '20px', marginBottom: '15px' }}><Users size={20} /> 초대 명단 정리 (Google 연동)</h2>
             <div style={{ display: 'flex', gap: '8px', marginBottom: '15px' }}>
               <input 
                 id="inviteName"
@@ -224,7 +224,7 @@ export default function LifeGalleryApp() {
           </div>
 
           <div style={{ width: '100%', marginBottom: '30px' }}>
-            <h2 style={{ fontSize: '20px', marginBottom: '15px' }}><ClipboardCheck size={20} inline /> 무대 데뷔 체크리스트</h2>
+            <h2 style={{ fontSize: '20px', marginBottom: '15px' }}><ClipboardCheck size={20} /> 무대 데뷔 체크리스트</h2>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               {[
                 { key: 'schedule', label: '발표 일정' },
