@@ -7,12 +7,10 @@ import { Camera, Image as ImageIcon, Sparkles, ArrowRight, ArrowLeft, Paintbrush
 export default function LifeGalleryApp() {
   const [step, setStep] = useState(0); 
   
-  // --- Step 1: Photo Engine Precision ---
+  // Step 1: Photo Engine
   const [localImage, setLocalImage] = useState<string | null>(null);
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [isAiPanelOpen, setIsAiPanelOpen] = useState(false);
-  const [selectedAgent, setSelectedAgent] = useState<'painting' | 'clarity' | 'collage' | null>(null);
   const [aiPrompt, setAiPrompt] = useState('');
   const [isAiProcessing, setIsAiProcessing] = useState(false);
   const [brightness, setBrightness] = useState(100);
@@ -20,7 +18,7 @@ export default function LifeGalleryApp() {
   const [saturation, setSaturation] = useState(100);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // --- Step 2: Writing Engine Precision ---
+  // Step 2: Writing Engine
   const [writingMode, setWritingMode] = useState<'manual' | 'ai' | null>(null);
   const [textContent, setTextContent] = useState('');
   const [font, setFont] = useState('Pretendard');
@@ -30,35 +28,36 @@ export default function LifeGalleryApp() {
   const [bgOpacity, setBgOpacity] = useState(0.45);
   const [isAiWriting, setIsAiWriting] = useState(false);
 
-  // --- Step 3: Music Engine Precision ---
-  const [musicMode, setMusicMode] = useState<'selection' | 'ai' | null>(null);
+  // Step 3: Music Engine
   const [selectedMusic, setSelectedMusic] = useState<string | null>(null);
   const [isAiMusicCreating, setIsAiMusicCreating] = useState(false);
   const [musicTempo, setMusicTempo] = useState(100);
   const [musicVolume, setMusicVolume] = useState(80);
 
-  // --- Step 4: Voice Engine Precision ---
+  // Step 4: Voice Engine
   const [isRecording, setIsRecording] = useState(false);
   const [recordedVoiceUrl, setRecordedVoiceUrl] = useState<string | null>(null);
-  const [isTransforming, setIsTransforming] = useState(false);
   const [voiceSpeed, setVoiceSpeed] = useState(1.0);
   const [voicePitch, setVoicePitch] = useState(100);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  // --- Step 5: Stage Manager ---
+  // Step 5: Stage Manager
   const [invitees, setInvitees] = useState<string[]>([]);
   const [checklist, setChecklist] = useState({ schedule: false, stage: false, vendor: false, outfit: false });
 
   const nextStep = () => setStep(prev => prev + 1);
   const prevStep = () => setStep(prev => Math.max(prev - 1, 0));
 
-  const handleAiWriting = (style?: string) => {
-    setIsAiWriting(true); setWritingMode('ai');
+  const handlePhotoAiRequest = () => {
+    if (!localImage) return;
+    setIsAiProcessing(true);
+    // AI 에이전트 시뮬레이션: 1.5초 후 효과 적용
     setTimeout(() => {
-      const phrases = style === 'poetic' ? ["별 헤는 밤에 새겨진 그대의 고운 그리움."] : ["햇살 가득했던 그날의 소중한 기록."];
-      setTextContent(phrases[0]); setIsAiWriting(false);
-    }, 1000);
+      setBrightness(110); setContrast(120); setSaturation(115);
+      setIsAiProcessing(false);
+      alert("AI 에이전트가 사진을 더 아름답게 보정했습니다!");
+    }, 1500);
   };
 
   return (
@@ -75,12 +74,17 @@ export default function LifeGalleryApp() {
         </div>
       )}
 
-      {/* STEP 1: 사진 엔진 (정밀 보정 슬라이더 추가) */}
+      {/* STEP 1: 사진 엔진 (통합 요청 UI) */}
       {step === 1 && (
         <div className="glass-panel animate-fade-in">
           <h1>사진 정밀 다듬기</h1>
           <div className="montage-item" style={{ marginBottom: '24px', aspectRatio: '4/3', cursor: 'pointer', overflow: 'hidden', position: 'relative' }}>
-            {localImage ? (
+            {isAiProcessing ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
+                <RefreshCcw size={48} className="animate-spin" color="#ec4899" />
+                <span style={{ fontWeight: 'bold' }}>AI 에이전트가 작업 중입니다...</span>
+              </div>
+            ) : localImage ? (
               <img 
                src={localImage} 
                alt="배경" 
@@ -91,40 +95,58 @@ export default function LifeGalleryApp() {
               />
             ) : <div onClick={() => fileInputRef.current?.click()} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}><ImageIcon size={64} style={{ opacity: 0.3 }} /><span>사진 선택</span></div>}
           </div>
-          <input type="file" accept="image/*" ref={fileInputRef} onChange={async (e) => {
+          <input type="file" accept="image/*" ref={fileInputRef} onChange={(e) => {
              const file = e.target.files?.[0];
              if (file) { setLocalImage(URL.createObjectURL(file)); }
           }} style={{ display: 'none' }} />
 
           {localImage && (
-            <div style={{ width: '100%', background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '20px', marginBottom: '20px' }}>
-               <h2 style={{ fontSize: '18px', marginBottom: '15px' }}><Sliders size={18} /> 정밀 보정 도구</h2>
-               <div className="slider-group" style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}><Sun size={16} /> <input type="range" min="50" max="150" value={brightness} onChange={e => setBrightness(parseInt(e.target.value))} style={{ flex: 1 }} /><span>밝기</span></div>
-                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}><Layers size={16} /> <input type="range" min="50" max="150" value={contrast} onChange={e => setContrast(parseInt(e.target.value))} style={{ flex: 1 }} /><span>대비</span></div>
-                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}><Palette size={16} /> <input type="range" min="0" max="200" value={saturation} onChange={e => setSaturation(parseInt(e.target.value))} style={{ flex: 1 }} /><span>채도</span></div>
-               </div>
-            </div>
+            <>
+              <div style={{ width: '100%', background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '20px', marginBottom: '15px' }}>
+                <h2 style={{ fontSize: '18px', marginBottom: '15px' }}><Sliders size={18} /> 정밀 보정 도구</h2>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}><Sun size={16} /> <input type="range" min="50" max="150" value={brightness} onChange={e => setBrightness(parseInt(e.target.value))} style={{ flex: 1 }} /><span>밝기</span></div>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}><Layers size={16} /> <input type="range" min="50" max="150" value={contrast} onChange={e => setContrast(parseInt(e.target.value))} style={{ flex: 1 }} /><span>대비</span></div>
+                </div>
+              </div>
+
+              {/* 통합된 AI 요청 UI */}
+              <div style={{ width: '100%', background: 'rgba(139, 92, 246, 0.1)', padding: '20px', borderRadius: '20px', border: '1px solid rgba(139, 92, 246, 0.3)', marginBottom: '20px' }}>
+                <h2 style={{ fontSize: '18px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}><Sparkles size={18} color="#8b5cf6" /> AI 에이전트 요청</h2>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <input 
+                    type="text" 
+                    placeholder="더 고치고 싶은 점을 적어주세요..." 
+                    style={{ flex: 1, padding: '12px', background: 'black', color: 'white', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.2)' }} 
+                    value={aiPrompt}
+                    onChange={e => setAiPrompt(e.target.value)}
+                  />
+                  <button 
+                    className="btn btn-primary" 
+                    style={{ background: '#8b5cf6', padding: '0 25px' }} 
+                    onClick={handlePhotoAiRequest}
+                  >
+                    요청
+                  </button>
+                </div>
+              </div>
+            </>
           )}
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%' }}>
-            {!localImage ? <button className="btn btn-primary" onClick={() => fileInputRef.current?.click()}>사진첩 열기</button> : (
-              <>
-                <button className="btn" style={{ background: 'linear-gradient(135deg, #ec4899, #8b5cf6)', color: 'white', padding: '24px', fontSize: '20px' }} onClick={() => setIsAiPanelOpen(!isAiPanelOpen)}><Sparkles size={24} /> AI 에이전트에게 시키기</button>
-                {isAiPanelOpen && (
-                   <div className="animate-fade-in" style={{ padding: '15px', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '15px' }}>
-                     <input type="text" placeholder="더 고치고 싶은 점을 적어주세요..." style={{ width: '100%', padding: '12px', background: 'black', color: 'white', borderRadius: '10px', marginBottom: '10px' }} />
-                     <button className="btn btn-primary" style={{ background: '#8b5cf6' }}>AI 재요청</button>
-                   </div>
-                )}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}><button className="btn btn-secondary" onClick={prevStep}>이전</button><button className="btn btn-primary" onClick={nextStep} style={{ background: '#10b981' }}>다음 글쓰기 <ArrowRight /></button></div>
-              </>
+          <div style={{ width: '100%' }}>
+            {!localImage ? (
+              <button className="btn btn-primary" onClick={() => fileInputRef.current?.click()} style={{ width: '100%', padding: '20px' }}>사진첩 열기</button>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <button className="btn btn-secondary" onClick={prevStep} style={{ padding: '20px' }}>이전</button>
+                <button className="btn btn-primary" onClick={nextStep} style={{ background: '#10b981', padding: '20px', fontSize: '20px' }}>다음 글쓰기 <ArrowRight /></button>
+              </div>
             )}
           </div>
         </div>
       )}
 
-      {/* STEP 2: 글쓰기 엔진 (줄 간격, 배경 투명도 추가) */}
+      {/* STEP 2: 글쓰기 엔진 */}
       {step === 2 && (
         <div className="glass-panel animate-fade-in">
           <h1>이야기 정밀 다듬기</h1>
@@ -134,28 +156,18 @@ export default function LifeGalleryApp() {
             <textarea style={{ position: 'relative', width: '90%', height: '80%', background: 'transparent', color: fontColor, fontSize: `${fontSize}px`, border: 'none', textAlign: 'center', fontFamily: font, lineHeight: lineHeight, resize: 'none', padding: '10px', zIndex: 10 }} value={textContent} onChange={e => setTextContent(e.target.value)} />
           </div>
 
-          <div style={{ width: '100%', background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '20px', marginBottom: '15px' }}>
-            <h2 style={{ fontSize: '18px', marginBottom: '15px' }}><Type size={18} /> 글자 및 오버레이 정밀 조절</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          <div style={{ width: '100%', background: 'rgba(255,255,255,0.05)', padding: '15px', borderRadius: '15px', marginBottom: '15px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}><span>크기</span><input type="range" min="20" max="60" value={fontSize} onChange={e => setFontSize(parseInt(e.target.value))} style={{ flex: 1 }} /></div>
-              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}><span>간격</span><input type="range" min="1.0" max="2.5" step="0.1" value={lineHeight} onChange={e => setLineHeight(parseFloat(e.target.value))} style={{ flex: 1 }} /></div>
               <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}><span>투명</span><input type="range" min="0" max="0.9" step="0.05" value={bgOpacity} onChange={e => setBgOpacity(parseFloat(e.target.value))} style={{ flex: 1 }} /></div>
-              <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>{['#ffffff', '#fff9c4', '#e1f5fe'].map(c => <button key={c} onClick={() => setFontColor(c)} style={{ width: '30px', height: '30px', background: c, borderRadius: '50%', border: fontColor === c ? '2px solid #ec4899' : 'none' }} />)}</div>
             </div>
           </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-              <button className="btn btn-secondary" onClick={() => handleAiWriting('poetic')}>🖋️ 더 시적으로</button>
-              <button className="btn btn-secondary" onClick={() => handleAiWriting()}>📄 요약하기</button>
-            </div>
-            <button className="btn btn-primary" onClick={nextStep} style={{ background: 'linear-gradient(135deg, #10b981, #059669)', padding: '20px', fontSize: '20px' }}>음악 만들러 가기 <ArrowRight /></button>
-            <button className="btn btn-secondary" onClick={prevStep}>이전</button>
-          </div>
+          <button className="btn btn-primary" onClick={nextStep} style={{ background: 'linear-gradient(135deg, #10b981, #059669)', width: '100%', padding: '20px' }}>음악 만들러 가기 <ArrowRight /></button>
+          <button className="btn btn-secondary" onClick={prevStep} style={{ width: '100%', marginTop: '8px' }}>이전</button>
         </div>
       )}
 
-      {/* STEP 3: 음악 엔진 (템포, 볼륨 추가) */}
+      {/* STEP 3: 음악 엔진 */}
       {step === 3 && (
         <div className="glass-panel animate-fade-in">
           <h1>음악 정밀 다듬기</h1>
@@ -165,47 +177,26 @@ export default function LifeGalleryApp() {
               <div style={{ marginTop: '10px', fontWeight: 'bold' }}>{selectedMusic || "음악을 선택하거나 만들어주세요"}</div>
             </div>
           </div>
-
-          <div style={{ width: '100%', background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '20px', marginBottom: '20px' }}>
-             <h2 style={{ fontSize: '18px', marginBottom: '15px' }}><Volume2 size={18} /> 소리 정밀 제어</h2>
-             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-               <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}><span>빠르기</span> <input type="range" min="50" max="150" value={musicTempo} onChange={e => setMusicTempo(parseInt(e.target.value))} style={{ flex: 1 }} /></div>
-               <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}><span>볼륨</span> <input type="range" min="0" max="100" value={musicVolume} onChange={e => setMusicVolume(parseInt(e.target.value))} style={{ flex: 1 }} /></div>
-             </div>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', width: '100%', marginBottom: '15px' }}>
-            <button className="btn btn-secondary" onClick={() => setSelectedMusic("🎹 부드러운 피아노")}>목록 선택</button>
-            <button className="btn btn-primary" style={{ background: '#8b5cf6' }} onClick={() => { setIsAiMusicCreating(true); setTimeout(() => { setSelectedMusic("🎻 AI 맞춤 선율"); setIsAiMusicCreating(false); }, 1500); }}>AI 작곡</button>
-          </div>
-          <button className="btn btn-primary" onClick={nextStep} style={{ background: 'linear-gradient(135deg, #10b981, #059669)', padding: '22px' }}>다음 목소리</button>
-          <button className="btn btn-secondary" onClick={prevStep} style={{ marginTop: '10px' }}>이전</button>
+          <button className="btn btn-primary" style={{ background: '#8b5cf6', width: '100%', padding: '20px' }} onClick={() => { setIsAiMusicCreating(true); setTimeout(() => { setSelectedMusic("🎻 AI 맞춤 전용 선율"); setIsAiMusicCreating(false); }, 1500); }}>AI 작곡 요청</button>
+          <button className="btn btn-primary" onClick={nextStep} style={{ background: 'linear-gradient(135deg, #10b981, #059669)', width: '100%', padding: '22px', marginTop: '10px' }}>다음 목소리</button>
+          <button className="btn btn-secondary" onClick={prevStep} style={{ width: '100%', marginTop: '10px' }}>이전</button>
         </div>
       )}
 
-      {/* STEP 4: 목소리 엔진 (빠르기, 피치 추가) */}
+      {/* STEP 4: 목소리 엔진 */}
       {step === 4 && (
         <div className="glass-panel animate-fade-in">
           <h1>목소리 정밀 다듬기</h1>
           <div style={{ background: 'rgba(255,255,255,0.05)', padding: '24px', borderRadius: '24px', width: '100%', textAlign: 'center', marginBottom: '20px' }}>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '30px', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '30px', marginBottom: '20px' }}>
               <button className="btn" style={{ background: isRecording ? '#dc2626' : '#ef4444', width: '70px', height: '70px', borderRadius: '50%' }} onClick={() => { setIsRecording(!isRecording); if (isRecording) setRecordedVoiceUrl('m'); }}>
                 {isRecording ? <div style={{ width: '15px', height: '15px', background: 'white', margin: 'auto' }} /> : <Mic color="white" />}
               </button>
               {recordedVoiceUrl && <button className="btn" style={{ background: '#3b82f6', width: '70px', height: '70px', borderRadius: '50%' }} onClick={() => setIsPlaying(!isPlaying)}><Play color="white" fill="white" /></button>}
             </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-               <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}><span>속도</span> <input type="range" min="0.5" max="1.5" step="0.1" value={voiceSpeed} onChange={e => setVoiceSpeed(parseFloat(e.target.value))} style={{ flex: 1 }} /><span>{voiceSpeed}x</span></div>
-               <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}><span>피치</span> <input type="range" min="70" max="130" value={voicePitch} onChange={e => setVoicePitch(parseInt(e.target.value))} style={{ flex: 1 }} /><span>{voicePitch}%</span></div>
-            </div>
           </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
-            <button className="btn btn-secondary" onClick={() => alert('감성 시 낭송가 톤으로 변환!')}>다른 목소리로 (AI 변환)</button>
-            <button className="btn btn-primary" onClick={nextStep} style={{ background: 'linear-gradient(45deg, #8b5cf6, #ec4899)', padding: '24px' }}>발표 마무리 <ArrowRight /></button>
-            <button className="btn btn-secondary" onClick={prevStep}>이전</button>
-          </div>
+          <button className="btn btn-primary" onClick={nextStep} style={{ background: 'linear-gradient(45deg, #8b5cf6, #ec4899)', width: '100%', padding: '24px' }}>발표 마무리 <ArrowRight /></button>
+          <button className="btn btn-secondary" onClick={prevStep} style={{ width: '100%', marginTop: '10px' }}>이전</button>
         </div>
       )}
 
@@ -213,18 +204,10 @@ export default function LifeGalleryApp() {
       {step === 5 && (
         <div className="glass-panel animate-fade-in">
           <h1>나의 무대 매니저</h1>
-          <div style={{ background: 'rgba(255,255,255,0.05)', padding: '20px', borderRadius: '20px', marginBottom: '20px', width: '100%' }}>
-            <h3><ClipboardCheck size={18}/> 이번주 데뷔 무대 체크리스트</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '10px' }}>
-              {['일정', '무대', '의상', '업체'].map(item => (
-                 <button key={item} className="btn" style={{ background: 'rgba(255,255,255,0.1)', justifyContent: 'flex-start' }}><Check size={16} /> {item} 확인</button>
-              ))}
-            </div>
-          </div>
-          <button className="btn btn-primary" style={{ padding: '24px', fontSize: '24px', background: 'linear-gradient(135deg, #10b981, #3b82f6)' }} onClick={() => { alert('성공적으로 무대가 준비되었습니다!'); setStep(0); }}>
+          <button className="btn btn-primary" style={{ padding: '24px', fontSize: '24px', background: 'linear-gradient(135deg, #10b981, #3b82f6)', width: '100%' }} onClick={() => { alert('축하합니다! 무대가 완벽하게 준비되었습니다.'); setStep(0); }}>
             최종 무대 시작하기! <Heart fill="currentColor" />
           </button>
-          <button className="btn btn-secondary" onClick={prevStep} style={{ marginTop: '10px' }}>이전</button>
+          <button className="btn btn-secondary" onClick={prevStep} style={{ width: '100%', marginTop: '10px' }}>이전</button>
         </div>
       )}
 
